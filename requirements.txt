@@ -1,0 +1,25 @@
+# MOE QA System Dependencies
+
+# Core framework
+pydantic>=2.0.0
+python-dotenv>=1.0.0
+
+# Ollama integration
+ollama>=0.1.0
+
+# Code analysis tools
+bandit>=1.7.0
+pylint>=2.0.0
+
+# Utilities
+requests>=2.31.0
+
+# Development and testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+black>=23.0.0
+mypy>=1.0.0
+
+# Optional: Web UI support (if running local Open-WebUI)
+# fastapi>=0.104.0
+# uvicorn>=0.24.0
