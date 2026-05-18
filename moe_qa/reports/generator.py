@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from orchestrator.router import MOEReport
+from moe_qa.orchestrator.router import MOEReport
 
 logger_local = None
 
@@ -36,7 +36,9 @@ class ReportGenerator:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
 
-    def generate_json_report(self, report: MOEReport, filename: Optional[str] = None) -> Path:
+    def generate_json_report(
+        self, report: MOEReport, filename: Optional[str] = None
+    ) -> Path:
         """
         Generate JSON report from MOE analysis.
 
@@ -84,7 +86,9 @@ class ReportGenerator:
 
         return output_path
 
-    def generate_html_report(self, report: MOEReport, filename: Optional[str] = None) -> Path:
+    def generate_html_report(
+        self, report: MOEReport, filename: Optional[str] = None
+    ) -> Path:
         """
         Generate HTML report from MOE analysis.
 

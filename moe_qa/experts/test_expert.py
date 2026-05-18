@@ -13,7 +13,7 @@ from typing import Optional
 import logging
 
 from .base_expert import BaseExpert, ExpertResponse
-from config.settings import ExpertModel
+from moe_qa.config.settings import ExpertModel
 
 logger = logging.getLogger(__name__)
 
@@ -53,7 +53,9 @@ class TestExpert(BaseExpert):
             temperature=0.3,
         )
 
-    def _build_prompt(self, code_snippet: str, context: Optional[str] = None) -> str:
+    def _build_prompt(
+        self, code_snippet: str, context: Optional[str] = None
+    ) -> str:
         """Build test-focused analysis prompt."""
         context_block = f"\nContext: {context}" if context else ""
         return (
@@ -62,6 +64,49 @@ class TestExpert(BaseExpert):
             f"```python\n{code_snippet}\n```\n\n"
             "Provide test coverage analysis:"
         )
+
+    def _build_fix_prompt(
+        self, code: str, context: Optional[str] = None
+    ) -> str:
+        """Build a test-generation prompt."""
+        context_block = f"\nContext: {context}" if context else ""
+        return (
+            "You are a test engineering expert. Write a complete pytest test suite "
+            f"for the module below.{context_block}\n\n"
+            "Rules:\n"
+            "- Return ONLY the Python test code, no explanations.\n"
+            "- Cover all public functions, edge cases, and error paths.\n"
+            "- Use pytest fixtures and parametrize where appropriate.\n\n"
+            f"```python\n{code}\n```"
+        )
+
+    def fix(self, code: str, context: Optional[str] = None) -> str:  # type: ignore[override]
+        """
+        Generate a pytest test suite for the given code.
+
+        Unlike other experts, the TestExpert does NOT modify the source file.
+        It returns the generated test code as a string so the orchestrator can
+        write it to a separate ``test_<filename>.py`` file.
+
+        Parameters
+        ----------
+        code : str
+            Source code to generate tests for.
+        context : str, optional
+            Additional context.
+
+        Returns
+        -------
+        str
+            Generated pytest test code.
+        """
+        try:
+            prompt = self._build_fix_prompt(code, context)
+            raw = self._query_model(prompt)
+            return self._extract_code(raw)
+        except Exception as exc:
+            logger.error("TestExpert.fix() failed: %s", exc)
+            return ""
 
     def analyze(
         self, code_snippet: str, context: Optional[str] = None
@@ -102,8 +147,10 @@ class TestExpert(BaseExpert):
             severity=severity,
             raw_response=raw_response,
             metadata={
-                "test_suggestions": llm_data.get("test_suggestions", [])
-                if isinstance(llm_data, dict)
-                else []
+                "test_suggestions": (
+                    llm_data.get("test_suggestions", [])
+                    if isinstance(llm_data, dict)
+                    else []
+                )
             },
         )

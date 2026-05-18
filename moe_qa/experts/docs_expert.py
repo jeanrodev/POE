@@ -12,7 +12,7 @@ from typing import Optional
 import logging
 
 from .base_expert import BaseExpert, ExpertResponse
-from config.settings import ExpertModel
+from moe_qa.config.settings import ExpertModel
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +51,9 @@ class DocsExpert(BaseExpert):
             temperature=0.15,
         )
 
-    def _build_prompt(self, code_snippet: str, context: Optional[str] = None) -> str:
+    def _build_prompt(
+        self, code_snippet: str, context: Optional[str] = None
+    ) -> str:
         """Build documentation-focused analysis prompt."""
         context_block = f"\nContext: {context}" if context else ""
         return (
@@ -61,7 +63,9 @@ class DocsExpert(BaseExpert):
             "Provide documentation analysis:"
         )
 
-    def _build_fix_prompt(self, code: str, context: Optional[str] = None) -> str:
+    def _build_fix_prompt(
+        self, code: str, context: Optional[str] = None
+    ) -> str:
         """Build a documentation-focused fix prompt."""
         context_block = f"\nContext: {context}" if context else ""
         return (
@@ -114,8 +118,10 @@ class DocsExpert(BaseExpert):
             severity=severity,
             raw_response=raw_response,
             metadata={
-                "missing_docstrings": llm_data.get("missing_docstrings", [])
-                if isinstance(llm_data, dict)
-                else []
+                "missing_docstrings": (
+                    llm_data.get("missing_docstrings", [])
+                    if isinstance(llm_data, dict)
+                    else []
+                )
             },
         )

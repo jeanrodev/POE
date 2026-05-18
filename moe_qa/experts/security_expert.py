@@ -16,7 +16,7 @@ from typing import Optional
 import logging
 
 from .base_expert import BaseExpert, ExpertResponse
-from config.settings import ExpertModel
+from moe_qa.config.settings import ExpertModel
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +65,9 @@ class SecurityExpert(BaseExpert):
             temperature=0.05,  # Low temp for deterministic security findings
         )
 
-    def _build_prompt(self, code_snippet: str, context: Optional[str] = None) -> str:
+    def _build_prompt(
+        self, code_snippet: str, context: Optional[str] = None
+    ) -> str:
         """
         Build security-focused analysis prompt.
 
@@ -132,6 +134,22 @@ class SecurityExpert(BaseExpert):
         except Exception as exc:
             logger.error(f"Error running Bandit: {exc}")
             return []
+
+    def _build_fix_prompt(
+        self, code: str, context: Optional[str] = None
+    ) -> str:
+        """Build a security-focused fix prompt."""
+        context_block = f"\nContext: {context}" if context else ""
+        return (
+            "You are a cybersecurity expert. Fix ALL security vulnerabilities in the "
+            "code below (OWASP Top 10, injection flaws, secrets leakage, insecure "
+            f"auth, etc.).{context_block}\n\n"
+            "Rules:\n"
+            "- Return ONLY the complete fixed Python code, no explanations.\n"
+            "- Do not remove functionality; only fix security issues.\n"
+            "- Add input validation and sanitisation where needed.\n\n"
+            f"```python\n{code}\n```"
+        )
 
     def analyze(
         self, code_snippet: str, context: Optional[str] = None

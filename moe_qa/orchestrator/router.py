@@ -12,12 +12,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterator
 
-from experts.security_expert import SecurityExpert
-from experts.quality_expert import QualityExpert
-from experts.test_expert import TestExpert
-from experts.docs_expert import DocsExpert
-from experts.base_expert import ExpertResponse
-from config.settings import Settings
+from moe_qa.experts.security_expert import SecurityExpert
+from moe_qa.experts.quality_expert import QualityExpert
+from moe_qa.experts.test_expert import TestExpert
+from moe_qa.experts.docs_expert import DocsExpert
+from moe_qa.experts.base_expert import ExpertResponse
+from moe_qa.config.settings import Settings
 
 logger = logging.getLogger(__name__)
 
@@ -92,7 +92,9 @@ class MOEOrchestrator:
             "docs": DocsExpert(host=host),
         }
 
-    def _determine_overall_severity(self, responses: list[ExpertResponse]) -> str:
+    def _determine_overall_severity(
+        self, responses: list[ExpertResponse]
+    ) -> str:
         """
         Compute overall severity from all expert responses.
 
@@ -146,7 +148,12 @@ class MOEOrchestrator:
         test_response = self._experts["tests"].analyze(code, context)
         docs_response = self._experts["docs"].analyze(code, context)
 
-        responses = [security_response, quality_response, test_response, docs_response]
+        responses = [
+            security_response,
+            quality_response,
+            test_response,
+            docs_response,
+        ]
         overall_severity = self._determine_overall_severity(responses)
 
         report = MOEReport(
@@ -209,7 +216,9 @@ class MOEOrchestrator:
 
         active_experts = experts or ["security", "quality", "docs", "tests"]
         # Canonical application order
-        apply_order = [e for e in ["security", "quality", "docs"] if e in active_experts]
+        apply_order = [
+            e for e in ["security", "quality", "docs"] if e in active_experts
+        ]
 
         # Backup original
         backup_path = None
@@ -247,7 +256,8 @@ class MOEOrchestrator:
             "file_path": str(file_path),
             "backup_path": str(backup_path) if backup_path else None,
             "tests_path": str(tests_path) if tests_path else None,
-            "experts_applied": apply_order + (["tests"] if "tests" in active_experts else []),
+            "experts_applied": apply_order
+            + (["tests"] if "tests" in active_experts else []),
             "changes_made": changes_made,
         }
 
@@ -291,7 +301,10 @@ class MOEOrchestrator:
         for file_path in files:
             try:
                 result = self.fix_file(
-                    str(file_path), context=context, experts=experts, backup=backup
+                    str(file_path),
+                    context=context,
+                    experts=experts,
+                    backup=backup,
                 )
                 results.append(result)
             except Exception as exc:

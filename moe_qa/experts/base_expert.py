@@ -10,6 +10,7 @@ References
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Optional
+import re
 import ollama
 import logging
 
@@ -82,7 +83,7 @@ class BaseExpert(ABC):
             If the model is not available locally.
         """
         try:
-            available_models = [m["name"] for m in self._client.list()["models"]]
+            available_models = [m.model for m in self._client.list().models]
             if self.model not in available_models:
                 raise RuntimeError(
                     f"Model '{self.model}' not found locally. "
@@ -121,9 +122,89 @@ class BaseExpert(ABC):
             logger.error("Failed to query local model %s: %s", self.model, exc)
             raise
 
+    def _extract_code(self, response: str) -> str:
+        """
+        Extract raw code from a model response that may be wrapped in markdown fences.
+
+        Parameters
+        ----------
+        response : str
+            Raw model output, possibly containing ```python ... ``` blocks.
+
+        Returns
+        -------
+        str
+            The extracted code, or the full response if no fences were found.
+        """
+        match = re.search(r"```(?:python)?\n(.*?)```", response, re.DOTALL)
+        if match:
+            return match.group(1).strip()
+        return response.strip()
+
+    def _build_fix_prompt(self, code: str, context: Optional[str] = None) -> str:
+        """
+        Build the expert-specific prompt for in-place code fixing.
+
+        Subclasses should override this with domain-specific instructions.
+
+        Parameters
+        ----------
+        code : str
+            Original source code.
+        context : str, optional
+            Additional context (framework, dependencies).
+
+        Returns
+        -------
+        str
+            Prompt requesting fixed code as output.
+        """
+        context_block = f"\nContext: {context}" if context else ""
+        return (
+            f"You are an expert code reviewer. Fix all issues in the code below."
+            f"{context_block}\n\n"
+            f"Return ONLY the complete corrected Python code with no explanations.\n\n"
+            f"```python\n{code}\n```"
+        )
+
+    def fix(self, code: str, context: Optional[str] = None) -> str:
+        """
+        Apply expert-specific fixes to code and return the corrected version.
+
+        This is the in-place editing counterpart to `analyze()`. Each expert
+        applies its domain knowledge to rewrite the code.
+
+        Parameters
+        ----------
+        code : str
+            Original source code.
+        context : str, optional
+            Additional context for analysis.
+
+        Returns
+        -------
+        str
+            Fixed source code. Falls back to original if the model fails.
+        """
+        try:
+            prompt = self._build_fix_prompt(code, context)
+            raw = self._query_model(prompt)
+            fixed = self._extract_code(raw)
+            # Sanity check: reject if the result is suspiciously short
+            if len(fixed) < len(code) * 0.3:
+                logger.warning(
+                    "%s returned suspiciously short fix output — keeping original",
+                    self.__class__.__name__,
+                )
+                return code
+            return fixed
+        except Exception as exc:
+            logger.error("%s.fix() failed: %s", self.__class__.__name__, exc)
+            return code
+
     @abstractmethod
     def _build_prompt(self, code_snippet: str, context: Optional[str]) -> str:
-        """Build expert-specific prompt."""
+        """Build expert-specific analysis prompt."""
         ...
 
     @abstractmethod

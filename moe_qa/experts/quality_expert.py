@@ -16,7 +16,7 @@ from typing import Optional
 import logging
 
 from .base_expert import BaseExpert, ExpertResponse
-from config.settings import ExpertModel
+from moe_qa.config.settings import ExpertModel
 
 logger = logging.getLogger(__name__)
 
@@ -57,7 +57,9 @@ class QualityExpert(BaseExpert):
             temperature=0.2,
         )
 
-    def _build_prompt(self, code_snippet: str, context: Optional[str] = None) -> str:
+    def _build_prompt(
+        self, code_snippet: str, context: Optional[str] = None
+    ) -> str:
         """Build quality-focused analysis prompt."""
         context_block = f"\nContext: {context}" if context else ""
         return (
@@ -65,6 +67,22 @@ class QualityExpert(BaseExpert):
             f"{context_block}\n\n"
             f"```python\n{code_snippet}\n```\n\n"
             "Provide code quality analysis:"
+        )
+
+    def _build_fix_prompt(
+        self, code: str, context: Optional[str] = None
+    ) -> str:
+        """Build a quality-focused fix prompt."""
+        context_block = f"\nContext: {context}" if context else ""
+        return (
+            "You are a code quality expert. Refactor the code below to follow "
+            "PEP 8, improve naming, reduce complexity, and apply best practices."
+            f"{context_block}\n\n"
+            "Rules:\n"
+            "- Return ONLY the complete refactored Python code, no explanations.\n"
+            "- Preserve all existing functionality exactly.\n"
+            "- Fix code style, naming, and structure issues.\n\n"
+            f"```python\n{code}\n```"
         )
 
     def _run_pylint(self, code_snippet: str) -> list[str]:

@@ -12,7 +12,8 @@ References
 - Pydantic: https://docs.pydantic.dev/latest/ (v2.x)
 """
 
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
 from enum import Enum
 
 
@@ -48,7 +49,7 @@ class Settings(BaseSettings):
 
     ollama_host: str = Field(
         default="http://localhost:11434",
-        description="Local Ollama server - NEVER point to external URL"
+        description="Local Ollama server - NEVER point to external URL",
     )
     max_tokens: int = Field(default=4096)
     temperature: float = Field(default=0.1)
