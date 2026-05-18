@@ -14,10 +14,11 @@ done
 echo "✓ Ollama server ready"
 
 # Models required by the MOE QA experts
+# Selected for 16 GB RAM systems — each model is ~4 GB, one runs at a time.
 MODELS=(
-    "codellama:34b"
-    "deepseek-coder:33b"
-    "wizardcoder:34b"
+    "codellama:7b"
+    "deepseek-coder:6.7b"
+    "wizardcoder:7b"
     "mistral:7b"
 )
 

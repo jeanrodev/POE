@@ -19,11 +19,11 @@ from enum import Enum
 class ExpertModel(str, Enum):
     """Available local models for expert roles."""
 
-    SECURITY = "codellama:34b"
-    QUALITY = "deepseek-coder:33b"
-    TEST = "wizardcoder:34b"
+    SECURITY = "codellama:7b"
+    QUALITY = "deepseek-coder:6.7b"
+    TEST = "wizardcoder:7b"
     DOCS = "mistral:7b"
-    ORCHESTRATOR = "mixtral:8x7b"
+    ORCHESTRATOR = "mistral:7b"
 
 
 class Settings(BaseSettings):

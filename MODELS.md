@@ -6,8 +6,8 @@ All models run inside the **`ollama_server` Docker container** — no Ollama ins
 ## Prerequisites
 
 - Docker and Docker Compose installed
-- At least 32 GB RAM (64 GB+ recommended for 34b models)
-- NVIDIA GPU recommended (CUDA 11.8+) for acceptable inference speed
+- At least 8 GB RAM (16 GB recommended for comfortable multi-tasking)
+- NVIDIA GPU optional but recommended for faster inference
 
 ## How Models Are Managed
 
@@ -16,7 +16,7 @@ Models are downloaded automatically the **first time the container starts**:
 ```bash
 docker compose up -d
 
-# Monitor download progress (~70 GB total on first run)
+# Monitor download progress (~18 GB total on first run)
 docker logs -f ollama_server
 ```
 
@@ -37,11 +37,11 @@ curl http://localhost:11434/api/tags
 
 | Model | Disk Space |
 |-------|-----------|
-| mistral:7b | ~5 GB |
-| codellama:34b | ~20 GB |
-| deepseek-coder:33b | ~20 GB |
-| wizardcoder:34b | ~22 GB |
-| **Total** | **~67 GB** |
+| codellama:7b | ~4 GB |
+| deepseek-coder:6.7b | ~4 GB |
+| wizardcoder:7b | ~4 GB |
+| mistral:7b | ~4 GB |
+| **Total** | **~16 GB** |
 
 ## Model Setup Options
 
@@ -53,9 +53,9 @@ Edit `moe_qa/config/settings.py` to use only the lightweight model, then in `oll
 MODELS=("mistral:7b")
 ```
 
-### Full Setup (32 GB+ RAM or GPU)
+### Default Setup (16 GB RAM)
 
-The default `ollama-entrypoint.sh` pulls all four models. For GPU-accelerated inference the `deploy.resources` section in `docker-compose.yml` is already configured for NVIDIA GPUs.
+The default `ollama-entrypoint.sh` pulls all four 7B models (~16 GB total). For GPU-accelerated inference uncomment the `deploy.resources` section in `docker-compose.yml`.
 
 ### CPU-Only Mode
 
@@ -92,7 +92,7 @@ MOE_MAX_TOKENS=2048
 bash setup-models.sh pull
 
 # Or target a single model inside the container
-docker exec ollama_server ollama pull codellama:34b
+docker exec ollama_server ollama pull codellama:7b
 ```
 
 ## Model Selection Rationale
@@ -140,14 +140,14 @@ docker compose up -d --build
 
 ### Slow inference
 1. Enable GPU acceleration (see GPU section above)
-2. Switch to smaller models (7b instead of 34b)
+2. Reduce `MOE_MAX_TOKENS` in `.env`
 3. Increase `MOE_TEMPERATURE` slightly for faster generation
 
 ### Model loading failure / corrupt download
 ```bash
 # Remove the model and re-pull
-docker exec ollama_server ollama rm codellama:34b
-docker exec ollama_server ollama pull codellama:34b
+docker exec ollama_server ollama rm codellama:7b
+docker exec ollama_server ollama pull codellama:7b
 ```
 
 ## References

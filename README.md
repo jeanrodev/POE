@@ -158,9 +158,9 @@ Machine-readable format for CI/CD integration and automation.
 
 | Expert | Primary Model | Task |
 |--------|---------------|------|
-| Security | CodeLlama:34b | Vulnerability detection, OWASP analysis |
-| Quality | DeepSeek-Coder:33b | Refactoring, patterns, complexity |
-| Tests | WizardCoder:34b | Test generation, gap analysis |
+| Security | CodeLlama:7b | Vulnerability detection, OWASP analysis |
+| Quality | DeepSeek-Coder:6.7b | Refactoring, patterns, complexity |
+| Tests | WizardCoder:7b | Test generation, gap analysis |
 | Docs | Mistral:7b | Docstring, comments, examples |
 
 ## 🚀 Advanced Usage
