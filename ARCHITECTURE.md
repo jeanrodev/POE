@@ -174,13 +174,13 @@ Report Output
 ### Local LLM Communication
 
 ```
-Client → Ollama API (HTTP)
+Client → Ollama API (HTTP, container port 11434)
          ├─ Chat endpoint: POST /api/chat
          ├─ List models: GET /api/tags
          └─ Generate: POST /api/generate
 
-All communication is local (127.0.0.1:11434)
-No external network calls
+All communication stays within the Docker network.
+No external network calls are made.
 ```
 
 ### Prompt Engineering Strategy
@@ -301,6 +301,7 @@ def generate_markdown_report(self, report):
 - ✅ No cloud uploads
 - ✅ GDPR/compliance friendly
 - ✅ Zero external dependencies for inference
+- ✅ No Ollama installation required on the host OS
 
 ### Model Provenance
 - Models downloaded from Ollama Hub

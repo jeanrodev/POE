@@ -9,13 +9,16 @@ Thank you for your interest in contributing to the MOE QA System!
 git clone <repo-url>
 cd POE
 
-# Run setup script
+# Run the setup script (installs Python deps + builds Docker image)
 bash setup.sh          # Linux/macOS
 # or
 powershell -ExecutionPolicy Bypass -File setup.ps1  # Windows
 
-# Download models
-bash setup-models.sh
+# Start the stack (models are downloaded automatically on first run)
+docker compose up -d
+
+# Monitor model download progress
+docker logs -f ollama_server
 ```
 
 ## Code Style
@@ -127,9 +130,10 @@ pytest tests/ --cov=moe_qa
 ## Reporting Issues
 
 Before reporting, check:
-1. Ollama is running: `curl http://localhost:11434/api/tags`
-2. Models are installed: `ollama list`
-3. Latest code: `git pull origin main`
+1. Containers are running: `docker compose ps`
+2. Ollama API is up: `curl http://localhost:11434/api/tags`
+3. Models are loaded: `bash setup-models.sh`
+4. Latest code: `git pull origin main`
 
 Include in issue report:
 - Python version

@@ -1,5 +1,6 @@
 #!/bin/bash
 # MOE QA System Setup Script for Linux/macOS
+# Ollama and all LLM models run entirely inside Docker — no local install needed.
 
 set -e
 
@@ -39,22 +40,44 @@ echo "✓ Directories created"
 
 # Check Docker
 echo ""
-echo "Checking Docker/Docker Compose..."
-if command -v docker-compose &> /dev/null; then
-    echo "✓ Docker Compose found"
-    echo ""
-    echo "To start Ollama infrastructure, run:"
-    echo "  docker-compose up -d"
-else
-    echo "⚠ Docker Compose not found. Install from https://docs.docker.com/compose/install/"
+echo "Checking Docker..."
+if ! command -v docker &> /dev/null; then
+    echo "❌ Docker not found. Install from https://docs.docker.com/get-docker/"
+    exit 1
 fi
+echo "✓ Docker found"
+
+# Check Docker Compose (v2 plugin or standalone)
+if docker compose version &> /dev/null 2>&1; then
+    COMPOSE_CMD="docker compose"
+elif command -v docker-compose &> /dev/null; then
+    COMPOSE_CMD="docker-compose"
+else
+    echo "❌ Docker Compose not found. Install from https://docs.docker.com/compose/install/"
+    exit 1
+fi
+echo "✓ Docker Compose found ($COMPOSE_CMD)"
+
+# Build the custom Ollama image
+echo ""
+echo "Building the Ollama image (includes model auto-pull on first start)..."
+$COMPOSE_CMD build ollama
+echo "✓ Image built"
 
 # Final instructions
 echo ""
 echo "✅ Setup Complete!"
 echo ""
 echo "Next steps:"
-echo "1. Start Ollama: docker-compose up -d"
-echo "2. Pull models: bash setup-models.sh"
-echo "3. Run analysis: python moe_qa/main.py src/ --format html"
+echo "1. Start the stack:  $COMPOSE_CMD up -d"
+echo "   ↳ On first start, models are automatically downloaded inside the container."
+echo "   ↳ This may take 30–60 minutes depending on your connection."
+echo ""
+echo "2. Monitor model download:"
+echo "   docker logs -f ollama_server"
+echo ""
+echo "3. Open the chat UI: http://localhost:3000"
+echo ""
+echo "4. Run code analysis: python moe_qa/main.py src/ --format html"
+echo "   (Ollama must be reachable at http://localhost:11434)"
 echo ""

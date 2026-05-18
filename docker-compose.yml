@@ -1,8 +1,12 @@
 version: "3.8"
 
 services:
+  # Custom Ollama image: starts the server and auto-pulls all required models
+  # into the named volume on first run. No Ollama installation needed on the host.
   ollama:
-    image: ollama/ollama:latest
+    build:
+      context: .
+      dockerfile: Dockerfile.ollama
     container_name: ollama_server
     volumes:
       - ollama_data:/root/.ollama
@@ -20,17 +24,26 @@ services:
     restart: unless-stopped
     environment:
       - OLLAMA_HOST=0.0.0.0:11434
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
 
+  # OpenWebUI: browser-based chat interface that connects to the Ollama container.
+  # Access at http://localhost:3000
   open-webui:
     image: ghcr.io/open-webui/open-webui:main
     container_name: open_webui
     depends_on:
-      - ollama
+      ollama:
+        condition: service_healthy
     ports:
       - "3000:8080"
     environment:
       - OLLAMA_BASE_URL=http://ollama:11434
-      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:-your-secret-key-here}
+      - WEBUI_SECRET_KEY=${WEBUI_SECRET_KEY:-change-me-in-production}
     volumes:
       - open_webui_data:/app/backend/data
     networks:
@@ -38,6 +51,7 @@ services:
     restart: unless-stopped
 
 volumes:
+  # Models are stored here; they persist across container restarts.
   ollama_data:
   open_webui_data:
 

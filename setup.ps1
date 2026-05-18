@@ -1,4 +1,5 @@
 # MOE QA System Setup Script for Windows (PowerShell)
+# Ollama and all LLM models run entirely inside Docker — no local install needed.
 
 Write-Host "🚀 MOE QA System Setup" -ForegroundColor Cyan
 Write-Host "=====================" -ForegroundColor Cyan
@@ -41,22 +42,30 @@ Write-Host "✓ Directories created" -ForegroundColor Green
 
 # Check Docker
 Write-Host ""
-Write-Host "Checking Docker/Docker Compose..." -ForegroundColor Yellow
-if (Get-Command docker-compose -ErrorAction SilentlyContinue) {
-    Write-Host "✓ Docker Compose found" -ForegroundColor Green
-    Write-Host ""
-    Write-Host "To start Ollama infrastructure, run:" -ForegroundColor Cyan
-    Write-Host "  docker-compose up -d" -ForegroundColor White
-} else {
-    Write-Host "⚠ Docker Compose not found. Install from https://docs.docker.com/compose/install/" -ForegroundColor Yellow
+Write-Host "Checking Docker..." -ForegroundColor Yellow
+if (-not (Get-Command docker -ErrorAction SilentlyContinue)) {
+    Write-Host "❌ Docker not found. Install from https://docs.docker.com/get-docker/" -ForegroundColor Red
+    exit 1
 }
+Write-Host "✓ Docker found" -ForegroundColor Green
+
+# Build the custom Ollama image
+Write-Host ""
+Write-Host "Building the Ollama image..." -ForegroundColor Yellow
+docker compose build ollama
+Write-Host "✓ Image built" -ForegroundColor Green
 
 # Final instructions
 Write-Host ""
 Write-Host "✅ Setup Complete!" -ForegroundColor Green
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Cyan
-Write-Host "1. Start Ollama: docker-compose up -d" -ForegroundColor White
-Write-Host "2. Pull models: python -m ollama pull codellama:34b" -ForegroundColor White
-Write-Host "3. Run analysis: python moe_qa\main.py src\ --format html" -ForegroundColor White
+Write-Host "1. Start the stack:  docker compose up -d" -ForegroundColor White
+Write-Host "   ↳ Models are downloaded automatically on first start (30–60 min)." -ForegroundColor DarkGray
+Write-Host ""
+Write-Host "2. Monitor download: docker logs -f ollama_server" -ForegroundColor White
+Write-Host ""
+Write-Host "3. Open chat UI:     http://localhost:3000" -ForegroundColor White
+Write-Host ""
+Write-Host "4. Run analysis:     python moe_qa\main.py src\ --format html" -ForegroundColor White
 Write-Host ""
