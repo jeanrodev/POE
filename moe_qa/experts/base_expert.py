@@ -141,7 +141,9 @@ class BaseExpert(ABC):
             return match.group(1).strip()
         return response.strip()
 
-    def _build_fix_prompt(self, code: str, context: Optional[str] = None) -> str:
+    def _build_fix_prompt(
+        self, code: str, context: Optional[str] = None
+    ) -> str:
         """
         Build the expert-specific prompt for in-place code fixing.
 
@@ -208,6 +210,8 @@ class BaseExpert(ABC):
         ...
 
     @abstractmethod
-    def analyze(self, code_snippet: str, context: Optional[str] = None) -> ExpertResponse:
+    def analyze(
+        self, code_snippet: str, context: Optional[str] = None
+    ) -> ExpertResponse:
         """Run expert analysis on provided code."""
         ...
