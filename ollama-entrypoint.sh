@@ -2,15 +2,13 @@
 # Starts the Ollama server and ensures all required models are present.
 # Models are pulled on first run and cached in the mounted volume.
 
-set -e
-
 echo "🚀 Starting Ollama server..."
-/bin/ollama serve &
+ollama serve &
 OLLAMA_PID=$!
 
-# Wait until the Ollama API responds
+# Wait until the Ollama API responds (no curl needed — uses the CLI itself)
 echo "⏳ Waiting for Ollama to be ready..."
-until curl -sf http://localhost:11434/api/tags > /dev/null 2>&1; do
+until ollama list > /dev/null 2>&1; do
     sleep 1
 done
 echo "✓ Ollama server ready"
@@ -24,12 +22,11 @@ MODELS=(
 )
 
 for model in "${MODELS[@]}"; do
-    model_name="${model%%:*}"
-    if ollama list 2>/dev/null | grep -q "^${model_name}"; then
+    if ollama list 2>/dev/null | grep -q "^${model}"; then
         echo "✓ ${model} already present"
     else
         echo "📦 Pulling ${model} — this may take a while on first start..."
-        ollama pull "${model}"
+        ollama pull "${model}" || echo "⚠ Failed to pull ${model}, continuing..."
         echo "✓ ${model} ready"
     fi
 done
