@@ -73,6 +73,30 @@ Examples:
         help="Output directory for reports (default: ./qa_reports)",
     )
 
+    parser.add_argument(
+        "--fix",
+        action="store_true",
+        default=False,
+        help="Apply expert fixes to files in place (backs up originals as .bak)",
+    )
+
+    parser.add_argument(
+        "--experts",
+        type=str,
+        default=None,
+        help=(
+            "Comma-separated list of experts for --fix "
+            "(default: all). Choices: security,quality,docs,tests"
+        ),
+    )
+
+    parser.add_argument(
+        "--no-backup",
+        action="store_true",
+        default=False,
+        help="Skip writing .bak backup files when using --fix",
+    )
+
     args = parser.parse_args()
 
     try:
@@ -82,11 +106,55 @@ Examples:
         # Create orchestrator
         orchestrator = MOEOrchestrator(settings=settings)
 
+        # Parse expert selection for --fix
+        selected_experts = None
+        if args.experts:
+            selected_experts = [e.strip() for e in args.experts.split(",")]
+
+        target_path = Path(args.target)
+
+        # ── Fix mode ────────────────────────────────────────────────────────────
+        if args.fix:
+            backup = not args.no_backup
+
+            if target_path.is_file():
+                result = orchestrator.fix_file(
+                    str(target_path),
+                    context=args.context,
+                    experts=selected_experts,
+                    backup=backup,
+                )
+                print(f"\n✓ Fixed: {result['file_path']}")
+                if result["backup_path"]:
+                    print(f"  Backup: {result['backup_path']}")
+                if result["tests_path"]:
+                    print(f"  Tests:  {result['tests_path']}")
+                print(f"  Experts applied: {', '.join(result['experts_applied'])}")
+                print(f"  Changes made: {result['changes_made']}")
+
+            elif target_path.is_dir():
+                results = orchestrator.fix_directory(
+                    str(target_path),
+                    context=args.context,
+                    experts=selected_experts,
+                    backup=backup,
+                )
+                changed = sum(1 for r in results if r["changes_made"])
+                print(f"\n✓ Fixed {len(results)} files ({changed} with changes)")
+                for r in results:
+                    status = "✎" if r["changes_made"] else "·"
+                    print(f"  {status} {r['file_path']}")
+                    if r["tests_path"]:
+                        print(f"    → tests: {r['tests_path']}")
+            else:
+                print(f"✗ Error: {args.target} is not a valid file or directory")
+                return 1
+
+            return 0
+
+        # ── Analyse mode (default) ───────────────────────────────────────────────
         # Create report generator
         generator = ReportGenerator(output_dir=args.output_dir)
-
-        # Analyze target
-        target_path = Path(args.target)
 
         if target_path.is_file():
             logger.info(f"Analyzing file: {args.target}")

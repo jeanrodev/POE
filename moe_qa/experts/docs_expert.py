@@ -61,6 +61,20 @@ class DocsExpert(BaseExpert):
             "Provide documentation analysis:"
         )
 
+    def _build_fix_prompt(self, code: str, context: Optional[str] = None) -> str:
+        """Build a documentation-focused fix prompt."""
+        context_block = f"\nContext: {context}" if context else ""
+        return (
+            "You are a technical documentation expert. Add or improve all "
+            "docstrings and inline comments in the code below (NumPy/Google style)."
+            f"{context_block}\n\n"
+            "Rules:\n"
+            "- Return ONLY the complete Python code with improved docs, no explanations.\n"
+            "- Every public function, class, and method must have a docstring.\n"
+            "- Do not change any logic or behaviour.\n\n"
+            f"```python\n{code}\n```"
+        )
+
     def analyze(
         self, code_snippet: str, context: Optional[str] = None
     ) -> ExpertResponse:

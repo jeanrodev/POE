@@ -163,6 +163,141 @@ class MOEOrchestrator:
         )
         return report
 
+    def fix_file(
+        self,
+        file_path: str,
+        context: str = None,
+        experts: list = None,
+        backup: bool = True,
+    ) -> dict:
+        """
+        Apply expert fixes to a file in place.
+
+        Experts are applied sequentially in priority order:
+        security → quality → docs. Each expert receives the output of
+        the previous one. The TestExpert generates a companion test file
+        instead of modifying the source.
+
+        Parameters
+        ----------
+        file_path : str
+            Path to the source file to fix.
+        context : str, optional
+            Additional context for analysis.
+        experts : list[str], optional
+            Subset of experts to apply: 'security', 'quality', 'docs', 'tests'.
+            Defaults to all four.
+        backup : bool
+            If True, write a ``.bak`` copy of the original before modifying.
+
+        Returns
+        -------
+        dict
+            Summary with keys: file_path, backup_path, tests_path,
+            experts_applied, changes_made.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the specified file does not exist.
+        """
+        path = Path(file_path)
+        if not path.exists():
+            raise FileNotFoundError(f"File not found: {file_path}")
+
+        original_code = path.read_text(encoding="utf-8")
+
+        active_experts = experts or ["security", "quality", "docs", "tests"]
+        # Canonical application order
+        apply_order = [e for e in ["security", "quality", "docs"] if e in active_experts]
+
+        # Backup original
+        backup_path = None
+        if backup:
+            backup_path = path.with_suffix(path.suffix + ".bak")
+            backup_path.write_text(original_code, encoding="utf-8")
+            logger.info("Backup written to %s", backup_path)
+
+        # Chain source-modifying experts
+        code = original_code
+        for expert_name in apply_order:
+            logger.info("Applying %s fixes to %s…", expert_name, file_path)
+            code = self._experts[expert_name].fix(code, context)
+
+        # Write fixed source back in place
+        changes_made = code != original_code
+        if changes_made:
+            path.write_text(code, encoding="utf-8")
+            logger.info("Fixed source written to %s", file_path)
+        else:
+            logger.info("No changes made to %s", file_path)
+
+        # TestExpert: generate companion test file
+        tests_path = None
+        if "tests" in active_experts:
+            test_code = self._experts["tests"].fix(code, context)
+            if test_code:
+                tests_dir = path.parent / "tests"
+                tests_dir.mkdir(exist_ok=True)
+                tests_path = tests_dir / f"test_{path.name}"
+                tests_path.write_text(test_code, encoding="utf-8")
+                logger.info("Generated tests written to %s", tests_path)
+
+        return {
+            "file_path": str(file_path),
+            "backup_path": str(backup_path) if backup_path else None,
+            "tests_path": str(tests_path) if tests_path else None,
+            "experts_applied": apply_order + (["tests"] if "tests" in active_experts else []),
+            "changes_made": changes_made,
+        }
+
+    def fix_directory(
+        self,
+        directory_path: str,
+        pattern: str = "**/*.py",
+        context: str = None,
+        experts: list = None,
+        backup: bool = True,
+    ) -> list[dict]:
+        """
+        Apply expert fixes to all matching files in a directory.
+
+        Parameters
+        ----------
+        directory_path : str
+            Root directory to process.
+        pattern : str
+            Glob pattern for files to fix (default: ``**/*.py``).
+        context : str, optional
+            Additional context for analysis.
+        experts : list[str], optional
+            Subset of experts to apply.
+        backup : bool
+            If True, write ``.bak`` files before modifying.
+
+        Returns
+        -------
+        list[dict]
+            One summary dict per processed file.
+        """
+        directory = Path(directory_path)
+        if not directory.is_dir():
+            raise NotADirectoryError(f"Not a directory: {directory_path}")
+
+        files = list(directory.glob(pattern))
+        logger.info("Found %d files matching pattern '%s'", len(files), pattern)
+
+        results = []
+        for file_path in files:
+            try:
+                result = self.fix_file(
+                    str(file_path), context=context, experts=experts, backup=backup
+                )
+                results.append(result)
+            except Exception as exc:
+                logger.error("Error fixing %s: %s", file_path, exc)
+        return results
+
     def analyze_directory(
         self, directory_path: str, pattern: str = "**/*.py", context: str = None
     ) -> Iterator[MOEReport]:

@@ -67,6 +67,32 @@ python moe_qa/main.py src/ --format json --output-dir ./reports
 python moe_qa/main.py src/api.py --context "FastAPI v0.100.0"
 ```
 
+### 🛠️ Fix mode — apply expert improvements in place
+
+Each expert reads a Python file, applies its lens (security, quality, docs), and writes the
+improved code back to disk. A `.bak` backup is created automatically unless `--no-backup` is
+passed. The `tests` expert generates a companion `tests/test_<filename>.py` instead of modifying
+the source.
+
+```bash
+# Fix all experts on a single file (backup written as auth.py.bak)
+python moe_qa/main.py src/auth.py --fix
+
+# Fix a whole directory
+python moe_qa/main.py src/ --fix
+
+# Run only the security and quality experts
+python moe_qa/main.py src/auth.py --fix --experts security,quality
+
+# Fix without writing backup files
+python moe_qa/main.py src/auth.py --fix --no-backup
+
+# Fix with context hint
+python moe_qa/main.py src/api.py --fix --context "FastAPI v0.100.0"
+```
+
+Available expert names for `--experts`: `security`, `quality`, `docs`, `tests`
+
 ## 📂 Project Structure
 
 ```
