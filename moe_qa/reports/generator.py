@@ -58,26 +58,29 @@ class ReportGenerator:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"moe_report_{timestamp}.json"
 
+        def response_to_dict(response):
+            return {
+                "findings": response.findings,
+                "severity": response.severity,
+                "recommendations": [
+                    {
+                        "description": rec.description,
+                        "priority": rec.priority,
+                        "effort": rec.effort,
+                        "impact": rec.impact,
+                    }
+                    for rec in response.recommendations
+                ],
+            }
+
         report_data = {
             "file_path": report.file_path,
             "timestamp": datetime.now().isoformat(),
             "overall_severity": report.overall_severity,
-            "security": {
-                "findings": report.security.findings,
-                "severity": report.security.severity,
-            },
-            "quality": {
-                "findings": report.quality.findings,
-                "severity": report.quality.severity,
-            },
-            "tests": {
-                "findings": report.tests.findings,
-                "severity": report.tests.severity,
-            },
-            "docs": {
-                "findings": report.docs.findings,
-                "severity": report.docs.severity,
-            },
+            "security": response_to_dict(report.security),
+            "quality": response_to_dict(report.quality),
+            "tests": response_to_dict(report.tests),
+            "docs": response_to_dict(report.docs),
         }
 
         output_path = self.output_dir / filename
@@ -126,18 +129,49 @@ class ReportGenerator:
             "unknown": "#757575",
         }
 
+        priority_color = {
+            "critical": "#d32f2f",
+            "high": "#f57c00",
+            "medium": "#fbc02d",
+            "low": "#388e3c",
+        }
+
         def render_expert_section(name: str, response) -> str:
             color = severity_color.get(response.severity, "#757575")
             findings_html = "".join(
                 f"<li>{finding}</li>" for finding in response.findings
             )
+
+            recommendations_html = ""
+            if response.recommendations:
+                recommendations_html = "<h4>💡 Recommendations:</h4><div class='recommendations'>"
+                for rec in response.recommendations:
+                    rec_priority_color = priority_color.get(rec.priority, "#757575")
+                    recommendations_html += f"""
+                    <div class="recommendation-item">
+                        <p><strong>{rec.description}</strong></p>
+                        <div class="rec-metadata">
+                            <span class="badge priority" style="background: {rec_priority_color};">
+                                Priority: {rec.priority.upper()}
+                            </span>
+                            <span class="badge effort">Effort: {rec.effort.upper()}</span>
+                            <span class="badge impact" style="background: {priority_color.get(rec.impact, '#757575')};">
+                                Impact: {rec.impact.upper()}
+                            </span>
+                        </div>
+                    </div>
+                    """
+                recommendations_html += "</div>"
+
             return f"""
             <div class="expert-section">
                 <h3 style="color: {color};">{name}</h3>
                 <p><strong>Severity:</strong> <span style="color: {color}; font-weight: bold;">{response.severity.upper()}</span></p>
+                <h4>Findings:</h4>
                 <ul>
                     {findings_html}
                 </ul>
+                {recommendations_html}
             </div>
             """
 
@@ -153,7 +187,15 @@ class ReportGenerator:
                 .container {{ background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
                 .expert-section {{ margin: 20px 0; padding: 15px; border-left: 4px solid #1976d2; background: #f9f9f9; }}
                 .expert-section h3 {{ margin-top: 0; }}
+                .expert-section h4 {{ color: #333; margin-top: 15px; margin-bottom: 10px; }}
                 ul {{ line-height: 1.8; }}
+                .recommendations {{ background: #e8f5e9; padding: 15px; border-radius: 4px; margin-top: 10px; }}
+                .recommendation-item {{ background: white; padding: 12px; margin: 10px 0; border-radius: 4px; border-left: 3px solid #4caf50; }}
+                .recommendation-item p {{ margin: 5px 0; }}
+                .rec-metadata {{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }}
+                .badge {{ display: inline-block; padding: 4px 8px; border-radius: 3px; font-size: 0.85em; color: white; font-weight: bold; }}
+                .badge.effort {{ background: #2196f3; }}
+                .badge.impact {{ color: white; }}
                 .footer {{ text-align: center; margin-top: 30px; color: #666; font-size: 0.9em; }}
             </style>
         </head>

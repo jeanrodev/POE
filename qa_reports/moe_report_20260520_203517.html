@@ -1,0 +1,200 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>MOE QA Report - sample_code.py</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+                .header { background: #1976d2; color: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+                .container { background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                .expert-section { margin: 20px 0; padding: 15px; border-left: 4px solid #1976d2; background: #f9f9f9; }
+                .expert-section h3 { margin-top: 0; }
+                .expert-section h4 { color: #333; margin-top: 15px; margin-bottom: 10px; }
+                ul { line-height: 1.8; }
+                .recommendations { background: #e8f5e9; padding: 15px; border-radius: 4px; margin-top: 10px; }
+                .recommendation-item { background: white; padding: 12px; margin: 10px 0; border-radius: 4px; border-left: 3px solid #4caf50; }
+                .recommendation-item p { margin: 5px 0; }
+                .rec-metadata { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+                .badge { display: inline-block; padding: 4px 8px; border-radius: 3px; font-size: 0.85em; color: white; font-weight: bold; }
+                .badge.effort { background: #2196f3; }
+                .badge.impact { color: white; }
+                .footer { text-align: center; margin-top: 30px; color: #666; font-size: 0.9em; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>MOE Quality Assurance Report</h1>
+                <p><strong>File:</strong> sample_code.py</p>
+                <p><strong>Overall Severity:</strong> <span style="background: #d32f2f; color: white; padding: 5px 10px; border-radius: 3px;">CRITICAL</span></p>
+            </div>
+            <div class="container">
+                
+            <div class="expert-section">
+                <h3 style="color: #757575;">🔒 Security Expert</h3>
+                <p><strong>Severity:</strong> <span style="color: #757575; font-weight: bold;">UNKNOWN</span></p>
+                <h4>Findings:</h4>
+                <ul>
+                    <li>[Bandit] Possible SQL injection vector through string-based query construction. at line 4</li><li>[Bandit] Use of possibly insecure function - consider using safer ast.literal_eval. at line 10</li><li>
+{
+"findings": ["SQL Injection", "Authentication/Authorization flaws"],
+"severity": "high",
+"recommendations": [
+{
+"description": "Implement input validation and sanitization for user inputs.",
+"priority": "medium",
+"effort": "small",
+"impact": "low"
+},
+{
+"description": "Use prepared statements instead of dynamic SQL queries to prevent SQL injection attacks.",
+"priority": "high",
+"effort": "medium",
+"impact": "high"
+}
+],
+"cve_references": [],
+"remediation": []
+}
+
+The code provided contains a vulnerability that can be exploited by an attacker to gain unauthorized access to the system. The authenticate_user function uses dynamic SQL queries, which makes it vulnerable to SQL injection attacks. An attacker can inject malicious SQL code into the username and password parameters, allowing them to access the system or manipulate data within the database.
+
+The process_user_input function also has a vulnerability that can be exploited by an attacker to execute arbitrary code on the system. The eval() function is used without any input validation, which makes it possible for an attacker to inject malicious code and execute it on the system. This can lead to unauthorized access or data tampering.
+
+To fix these vulnerabilities, we recommend implementing input validation and sanitization for user inputs, as well as using prepared statements instead of dynamic SQL queries to prevent SQL injection attacks. Additionally, we suggest using a secure method for evaluating user-provided code, such as using a sandboxed environment or a whitelist of allowed functions.</li>
+                </ul>
+                
+            </div>
+            
+                
+            <div class="expert-section">
+                <h3 style="color: #f57c00;">📝 Code Quality Expert</h3>
+                <p><strong>Severity:</strong> <span style="color: #f57c00; font-weight: bold;">HIGH</span></p>
+                <h4>Findings:</h4>
+                <ul>
+                    <li>Vulnerability in authenticate_user function</li><li>Dangerous usage of eval() function</li><li>[Pylint] Trailing whitespace (trailing-whitespace) at line 7</li><li>[Pylint] Missing module docstring (missing-module-docstring) at line 1</li><li>[Pylint] Undefined variable 'db' (undefined-variable) at line 5</li><li>[Pylint] Use of eval (eval-used) at line 10</li>
+                </ul>
+                <h4>💡 Recommendations:</h4><div class='recommendations'>
+                    <div class="recommendation-item">
+                        <p><strong>Use parameterized queries or prepared statements to prevent SQL injection attacks.</strong></p>
+                        <div class="rec-metadata">
+                            <span class="badge priority" style="background: #d32f2f;">
+                                Priority: CRITICAL
+                            </span>
+                            <span class="badge effort">Effort: MEDIUM</span>
+                            <span class="badge impact" style="background: #f57c00;">
+                                Impact: HIGH
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-item">
+                        <p><strong>Avoid using eval() function as it can lead to code execution vulnerabilities.</strong></p>
+                        <div class="rec-metadata">
+                            <span class="badge priority" style="background: #f57c00;">
+                                Priority: HIGH
+                            </span>
+                            <span class="badge effort">Effort: SMALL</span>
+                            <span class="badge impact" style="background: #fbc02d;">
+                                Impact: MEDIUM
+                            </span>
+                        </div>
+                    </div>
+                    </div>
+            </div>
+            
+                
+            <div class="expert-section">
+                <h3 style="color: #f57c00;">🧪 Test Coverage Expert</h3>
+                <p><strong>Severity:</strong> <span style="color: #f57c00; font-weight: bold;">HIGH</span></p>
+                <h4>Findings:</h4>
+                <ul>
+                    <li>Vulnerability in authenticate_user function due to SQL injection vulnerability</li><li>Potential code execution vulnerability in process_user_input function</li>
+                </ul>
+                <h4>💡 Recommendations:</h4><div class='recommendations'>
+                    <div class="recommendation-item">
+                        <p><strong>Use parameterized queries or prepared statements instead of string concatenation for database queries to prevent SQL injection attacks.</strong></p>
+                        <div class="rec-metadata">
+                            <span class="badge priority" style="background: #d32f2f;">
+                                Priority: CRITICAL
+                            </span>
+                            <span class="badge effort">Effort: MEDIUM</span>
+                            <span class="badge impact" style="background: #f57c00;">
+                                Impact: HIGH
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-item">
+                        <p><strong>Validate user input before using it in dangerous functions like eval() or exec().</strong></p>
+                        <div class="rec-metadata">
+                            <span class="badge priority" style="background: #388e3c;">
+                                Priority: LOW
+                            </span>
+                            <span class="badge effort">Effort: SMALL</span>
+                            <span class="badge impact" style="background: #fbc02d;">
+                                Impact: MEDIUM
+                            </span>
+                        </div>
+                    </div>
+                    </div>
+            </div>
+            
+                
+            <div class="expert-section">
+                <h3 style="color: #d32f2f;">📚 Documentation Expert</h3>
+                <p><strong>Severity:</strong> <span style="color: #d32f2f; font-weight: bold;">CRITICAL</span></p>
+                <h4>Findings:</h4>
+                <ul>
+                    <li>insecure_code</li><li>lack_of_documentation</li>
+                </ul>
+                <h4>💡 Recommendations:</h4><div class='recommendations'>
+                    <div class="recommendation-item">
+                        <p><strong>Secure the authentication function by using parameterized queries or prepared statements to prevent SQL injection attacks.</strong></p>
+                        <div class="rec-metadata">
+                            <span class="badge priority" style="background: #d32f2f;">
+                                Priority: CRITICAL
+                            </span>
+                            <span class="badge effort">Effort: LARGE</span>
+                            <span class="badge impact" style="background: #d32f2f;">
+                                Impact: CRITICAL
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-item">
+                        <p><strong>Implement input validation in the process_user_input function to ensure safe processing of user data.</strong></p>
+                        <div class="rec-metadata">
+                            <span class="badge priority" style="background: #f57c00;">
+                                Priority: HIGH
+                            </span>
+                            <span class="badge effort">Effort: MEDIUM</span>
+                            <span class="badge impact" style="background: #f57c00;">
+                                Impact: HIGH
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="recommendation-item">
+                        <p><strong>Add docstrings for both functions describing their purpose, inputs, outputs, and any other relevant details.</strong></p>
+                        <div class="rec-metadata">
+                            <span class="badge priority" style="background: #fbc02d;">
+                                Priority: MEDIUM
+                            </span>
+                            <span class="badge effort">Effort: MINIMAL</span>
+                            <span class="badge impact" style="background: #fbc02d;">
+                                Impact: MEDIUM
+                            </span>
+                        </div>
+                    </div>
+                    </div>
+            </div>
+            
+            </div>
+            <div class="footer">
+                <p>Generated: 2026-05-20 20:35:17</p>
+                <p>MOE QA System v0.1.0</p>
+            </div>
+        </body>
+        </html>
+        

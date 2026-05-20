@@ -10,8 +10,9 @@ References
 
 from typing import Optional
 import logging
+import json
 
-from .base_expert import BaseExpert, ExpertResponse
+from .base_expert import BaseExpert, ExpertResponse, Recommendation
 from config.settings import ExpertModel
 
 logger = logging.getLogger(__name__)
@@ -28,6 +29,14 @@ Analyze the code and return findings in this exact JSON format:
 {
     "findings": ["gap1", "gap2"],
     "severity": "critical|high|medium|low",
+    "recommendations": [
+        {
+            "description": "specific documentation improvement",
+            "priority": "critical|high|medium|low",
+            "effort": "minimal|small|medium|large",
+            "impact": "critical|high|medium|low"
+        }
+    ],
     "missing_docstrings": [],
     "documentation_improvements": []
 }
@@ -97,17 +106,32 @@ class DocsExpert(BaseExpert):
         ExpertResponse
             Standardized expert response with documentation findings.
         """
-        import json
-
         # LLM-based analysis
         prompt = self._build_prompt(code_snippet, context)
         raw_response = self._query_model(prompt)
 
         # Parse LLM response
+        findings = []
+        severity = "medium"
+        recommendations = []
+        llm_data = {}
+        
         try:
             llm_data = json.loads(raw_response)
             findings = llm_data.get("findings", [])
             severity = llm_data.get("severity", "medium")
+            
+            # Parse recommendations
+            rec_data = llm_data.get("recommendations", [])
+            for rec in rec_data:
+                recommendations.append(
+                    Recommendation(
+                        description=rec.get("description", ""),
+                        priority=rec.get("priority", "medium"),
+                        effort=rec.get("effort", "medium"),
+                        impact=rec.get("impact", "medium"),
+                    )
+                )
         except json.JSONDecodeError:
             findings = [raw_response]
             severity = "unknown"
@@ -116,6 +140,7 @@ class DocsExpert(BaseExpert):
             expert_name="DocsExpert",
             findings=findings,
             severity=severity,
+            recommendations=recommendations,
             raw_response=raw_response,
             metadata={
                 "missing_docstrings": (

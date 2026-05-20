@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Optional
 import logging
 
-from .base_expert import BaseExpert, ExpertResponse
+from .base_expert import BaseExpert, ExpertResponse, Recommendation
 from config.settings import ExpertModel
 
 logger = logging.getLogger(__name__)
@@ -32,6 +32,14 @@ Analyze the code and return findings in this exact JSON format:
 {
     "findings": ["issue1", "issue2"],
     "severity": "critical|high|medium|low",
+    "recommendations": [
+        {
+            "description": "specific refactoring suggestion",
+            "priority": "critical|high|medium|low",
+            "effort": "minimal|small|medium|large",
+            "impact": "critical|high|medium|low"
+        }
+    ],
     "refactoring_suggestions": [],
     "patterns": []
 }
@@ -143,10 +151,26 @@ class QualityExpert(BaseExpert):
         pylint_findings = self._run_pylint(code_snippet)
 
         # Parse LLM response
+        findings = []
+        severity = "medium"
+        recommendations = []
+        
         try:
             llm_data = json.loads(raw_response)
             findings = llm_data.get("findings", []) + pylint_findings
             severity = llm_data.get("severity", "medium")
+            
+            # Parse recommendations
+            rec_data = llm_data.get("recommendations", [])
+            for rec in rec_data:
+                recommendations.append(
+                    Recommendation(
+                        description=rec.get("description", ""),
+                        priority=rec.get("priority", "medium"),
+                        effort=rec.get("effort", "medium"),
+                        impact=rec.get("impact", "medium"),
+                    )
+                )
         except json.JSONDecodeError:
             findings = pylint_findings + [raw_response]
             severity = "unknown"
@@ -155,6 +179,7 @@ class QualityExpert(BaseExpert):
             expert_name="QualityExpert",
             findings=findings,
             severity=severity,
+            recommendations=recommendations,
             raw_response=raw_response,
             metadata={"pylint_count": len(pylint_findings)},
         )

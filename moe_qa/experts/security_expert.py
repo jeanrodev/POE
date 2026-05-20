@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Optional
 import logging
 
-from .base_expert import BaseExpert, ExpertResponse
+from .base_expert import BaseExpert, ExpertResponse, Recommendation
 from config.settings import ExpertModel
 
 logger = logging.getLogger(__name__)
@@ -32,6 +32,14 @@ Analyze the code and return findings in this exact JSON format:
 {
     "findings": ["finding1", "finding2"],
     "severity": "critical|high|medium|low",
+    "recommendations": [
+        {
+            "description": "specific recommended change",
+            "priority": "critical|high|medium|low",
+            "effort": "minimal|small|medium|large",
+            "impact": "critical|high|medium|low"
+        }
+    ],
     "cve_references": [],
     "remediation": []
 }
@@ -177,10 +185,26 @@ class SecurityExpert(BaseExpert):
         bandit_findings = self._run_bandit(code_snippet)
 
         # Parse LLM response
+        findings = []
+        severity = "medium"
+        recommendations = []
+        
         try:
             llm_data = json.loads(raw_response)
             findings = llm_data.get("findings", []) + bandit_findings
             severity = llm_data.get("severity", "medium")
+            
+            # Parse recommendations
+            rec_data = llm_data.get("recommendations", [])
+            for rec in rec_data:
+                recommendations.append(
+                    Recommendation(
+                        description=rec.get("description", ""),
+                        priority=rec.get("priority", "medium"),
+                        effort=rec.get("effort", "medium"),
+                        impact=rec.get("impact", "medium"),
+                    )
+                )
         except json.JSONDecodeError:
             findings = bandit_findings + [raw_response]
             severity = "unknown"
@@ -189,6 +213,7 @@ class SecurityExpert(BaseExpert):
             expert_name="SecurityExpert",
             findings=findings,
             severity=severity,
+            recommendations=recommendations,
             raw_response=raw_response,
             metadata={"bandit_count": len(bandit_findings)},
         )

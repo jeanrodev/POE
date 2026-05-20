@@ -18,6 +18,29 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
+class Recommendation:
+    """
+    A proposed change with priority rating.
+
+    Parameters
+    ----------
+    description : str
+        What should be changed.
+    priority : str
+        Priority level: 'critical', 'high', 'medium', 'low'.
+    effort : str
+        Implementation effort: 'minimal', 'small', 'medium', 'large'.
+    impact : str
+        Expected impact: 'critical', 'high', 'medium', 'low'.
+    """
+
+    description: str
+    priority: str
+    effort: str
+    impact: str
+
+
+@dataclass
 class ExpertResponse:
     """
     Standardized response from any expert.
@@ -30,6 +53,8 @@ class ExpertResponse:
         List of identified issues or suggestions.
     severity : str
         Overall severity: 'critical', 'high', 'medium', 'low'.
+    recommendations : list[Recommendation]
+        Proposed changes with ratings.
     raw_response : str
         Raw model output for traceability.
     metadata : dict
@@ -39,7 +64,8 @@ class ExpertResponse:
     expert_name: str
     findings: list[str]
     severity: str
-    raw_response: str
+    recommendations: list[Recommendation] = field(default_factory=list)
+    raw_response: str = ""
     metadata: dict = field(default_factory=dict)
 
 
