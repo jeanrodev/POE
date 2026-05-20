@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class Recommendation:
     """
-    A proposed change with priority rating.
+    A proposed change with priority rating and code example.
 
     Parameters
     ----------
@@ -32,12 +32,18 @@ class Recommendation:
         Implementation effort: 'minimal', 'small', 'medium', 'large'.
     impact : str
         Expected impact: 'critical', 'high', 'medium', 'low'.
+    code_before : str
+        Example code showing the problem.
+    code_after : str
+        Example code showing the fix.
     """
 
     description: str
     priority: str
     effort: str
     impact: str
+    code_before: str = ""
+    code_after: str = ""
 
 
 @dataclass

@@ -1,0 +1,261 @@
+
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>MOE QA Report - sample_code.py</title>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+            <style>
+                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #f5f5f5; }
+                .header { background: #1976d2; color: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; }
+                .container { background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+                .expert-section { margin: 20px 0; padding: 15px; border-left: 4px solid #1976d2; background: #f9f9f9; }
+                .expert-section h3 { margin-top: 0; }
+                .expert-section h4 { color: #333; margin-top: 15px; margin-bottom: 10px; }
+                ul { line-height: 1.8; }
+                .recommendations { background: #e8f5e9; padding: 15px; border-radius: 4px; margin-top: 10px; }
+                .recommendation-item { background: white; padding: 12px; margin: 10px 0; border-radius: 4px; border-left: 3px solid #4caf50; }
+                .recommendation-item p { margin: 5px 0; }
+                .rec-metadata { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; margin-bottom: 10px; }
+                .badge { display: inline-block; padding: 4px 8px; border-radius: 3px; font-size: 0.85em; color: white; font-weight: bold; }
+                .badge.effort { background: #2196f3; }
+                .badge.impact { color: white; }
+                
+                .code-example { margin-top: 12px; background: #f5f5f5; padding: 10px; border-radius: 4px; }
+                .code-section { margin: 8px 0; }
+                .code-section strong { display: block; margin-bottom: 6px; color: #333; font-size: 0.9em; }
+                .code-section pre { margin: 0; padding: 10px; background: #2d2d2d; border-radius: 3px; overflow-x: auto; }
+                .code-section code { font-size: 0.85em; line-height: 1.5; }
+                
+                .footer { text-align: center; margin-top: 30px; color: #666; font-size: 0.9em; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>MOE Quality Assurance Report</h1>
+                <p><strong>File:</strong> sample_code.py</p>
+                <p><strong>Overall Severity:</strong> <span style="background: #d32f2f; color: white; padding: 5px 10px; border-radius: 3px;">CRITICAL</span></p>
+            </div>
+            <div class="container">
+                
+            <div class="expert-section">
+                <h3 style="color: #757575;">🔒 Security Expert</h3>
+                <p><strong>Severity:</strong> <span style="color: #757575; font-weight: bold;">UNKNOWN</span></p>
+                <h4>Findings:</h4>
+                <ul>
+                    <li>[Bandit] Possible SQL injection vector through string-based query construction. at line 4</li><li>[Bandit] Use of possibly insecure function - consider using safer ast.literal_eval. at line 10</li><li>
+{
+"findings": ["SQL Injection", "Authentication/Authorization flaws"],
+"severity": "critical",
+"recommendations": [
+{
+"description": "Implement input validation and sanitization for user data.",
+"priority": "high",
+"effort": "medium",
+"impact": "high",
+"code_before": "eval(user_data)",
+"code_after": "import re; user_data = re.sub('[^a-zA-Z0-9]', '', user_data)"
+},
+{
+"description": "Implement proper authentication and authorization mechanisms.",
+"priority": "high",
+"effort": "medium",
+"impact": "high",
+"code_before": "authenticate_user(username, password)",
+"code_after": "import hashlib; username = hashlib.sha256(username).hexdigest(); password = hashlib.sha256(password).hexdigest()"
+}
+],
+"cve_references": [],
+"remediation": []
+}
+
+The code provided contains a vulnerability to SQL Injection and Authentication/Authorization flaws.
+
+SQL Injection: The authenticate_user function uses a dynamic query that is constructed using user-supplied input, which can lead to an attacker injecting malicious SQL code. This can result in unauthorized access or data tampering.
+
+Authentication/Authorization flaws: The process_user_input function does not validate the user's input and uses eval() to execute it, which can lead to arbitrary code execution. This can result in an attacker gaining unauthorized access to sensitive information or system resources.
+
+Recommendations:
+
+1. Implement input validation and sanitization for user data to prevent SQL Injection attacks.
+2. Implement proper authentication and authorization mechanisms to prevent Authentication/Authorization flaws.</li>
+                </ul>
+                
+            </div>
+            
+                
+            <div class="expert-section">
+                <h3 style="color: #fbc02d;">📝 Code Quality Expert</h3>
+                <p><strong>Severity:</strong> <span style="color: #fbc02d; font-weight: bold;">MEDIUM</span></p>
+                <h4>Findings:</h4>
+                <ul>
+                    <li>{'description': 'Vulnerable to SQL injection', 'severity': 'high'}</li><li>{'description': 'Unsafe use of eval function', 'severity': 'critical'}</li><li>[Pylint] Trailing whitespace (trailing-whitespace) at line 7</li><li>[Pylint] Missing module docstring (missing-module-docstring) at line 1</li><li>[Pylint] Undefined variable 'db' (undefined-variable) at line 5</li><li>[Pylint] Use of eval (eval-used) at line 10</li>
+                </ul>
+                <h4>💡 Recommendations:</h4><div class='recommendations'>
+                    <div class="recommendation-item">
+                        <p><strong>Use parameterized queries or ORM to prevent SQL injection</strong></p>
+                        <div class="rec-metadata">
+                            <span class="badge priority" style="background: #f57c00;">
+                                Priority: HIGH
+                            </span>
+                            <span class="badge effort">Effort: MEDIUM</span>
+                            <span class="badge impact" style="background: #388e3c;">
+                                Impact: LOW
+                            </span>
+                        </div>
+                        <div class='code-example'>
+                            <div class="code-section">
+                                <strong>Before (Problematic):</strong>
+                                <pre><code class="language-python">query = f"SELECT * FROM users WHERE username='{username}' AND password='{password}'"</code></pre>
+                            </div>
+                            
+                            <div class="code-section">
+                                <strong>After (Fixed):</strong>
+                                <pre><code class="language-python">query = "SELECT * FROM users WHERE username=%s AND password=%s", (username, password)</code></pre>
+                            </div>
+                            </div>
+                    </div>
+                    
+                    <div class="recommendation-item">
+                        <p><strong>Avoid using eval function as it can lead to code injection attacks</strong></p>
+                        <div class="rec-metadata">
+                            <span class="badge priority" style="background: #d32f2f;">
+                                Priority: CRITICAL
+                            </span>
+                            <span class="badge effort">Effort: LARGE</span>
+                            <span class="badge impact" style="background: #f57c00;">
+                                Impact: HIGH
+                            </span>
+                        </div>
+                        <div class='code-example'>
+                            <div class="code-section">
+                                <strong>Before (Problematic):</strong>
+                                <pre><code class="language-python">eval(user_data)</code></pre>
+                            </div>
+                            
+                            <div class="code-section">
+                                <strong>After (Fixed):</strong>
+                                <pre><code class="language-python">Remove or replace the eval function call</code></pre>
+                            </div>
+                            </div>
+                    </div>
+                    </div>
+            </div>
+            
+                
+            <div class="expert-section">
+                <h3 style="color: #757575;">🧪 Test Coverage Expert</h3>
+                <p><strong>Severity:</strong> <span style="color: #757575; font-weight: bold;">UNKNOWN</span></p>
+                <h4>Findings:</h4>
+                <ul>
+                    <li>```json
+{
+    "findings": ["authenticate_user function is vulnerable to SQL injection attacks", "process_user_input function does not validate user input"],
+    "severity": "high",
+    "recommendations": [
+        {
+            "description": "Use parameterized queries or prepared statements instead of string interpolation for database queries",
+            "priority": "critical",
+            "effort": "medium",
+            "impact": "high"
+        },
+        {
+            "description": "Validate user input before using it in dangerous functions like eval()",
+            "priority": "critical",
+            "effort": "small",
+            "impact": "low"
+        }
+    ],
+    "test_suggestions": [],
+    "coverage_gaps": ["Function is not tested for edge cases"],
+    "edge_cases": [
+        {
+            "description": "Test with empty username",
+            "input": {"username": "", "password": "pass123"},
+            "expected_output": False,
+            "actual_output": True
+        },
+        {
+            "description": "Test with empty password",
+            "input": {"username": "user1", "password": ""},
+            "expected_output": False,
+            "actual_output": True
+        }
+    ]
+}
+``` </li>
+                </ul>
+                
+            </div>
+            
+                
+            <div class="expert-section">
+                <h3 style="color: #d32f2f;">📚 Documentation Expert</h3>
+                <p><strong>Severity:</strong> <span style="color: #d32f2f; font-weight: bold;">CRITICAL</span></p>
+                <h4>Findings:</h4>
+                <ul>
+                    <li>insecure_code</li><li>lack_of_documentation</li>
+                </ul>
+                <h4>💡 Recommendations:</h4><div class='recommendations'>
+                    <div class="recommendation-item">
+                        <p><strong>Secure the authentication function by using parameterized queries or prepared statements to prevent SQL injection attacks.</strong></p>
+                        <div class="rec-metadata">
+                            <span class="badge priority" style="background: #d32f2f;">
+                                Priority: CRITICAL
+                            </span>
+                            <span class="badge effort">Effort: LARGE</span>
+                            <span class="badge impact" style="background: #d32f2f;">
+                                Impact: CRITICAL
+                            </span>
+                        </div>
+                        <div class='code-example'>
+                            <div class="code-section">
+                                <strong>Before (Problematic):</strong>
+                                <pre><code class="language-python">def authenticate_user(username, password): ...</code></pre>
+                            </div>
+                            
+                            <div class="code-section">
+                                <strong>After (Fixed):</strong>
+                                <pre><code class="language-python">def authenticate_user(username, password, db): ... (with secure query execution)</code></pre>
+                            </div>
+                            </div>
+                    </div>
+                    
+                    <div class="recommendation-item">
+                        <p><strong>Add proper documentation for the `process_user_input` function explaining that it lacks input validation and should not be used as-is.</strong></p>
+                        <div class="rec-metadata">
+                            <span class="badge priority" style="background: #d32f2f;">
+                                Priority: CRITICAL
+                            </span>
+                            <span class="badge effort">Effort: MINIMAL</span>
+                            <span class="badge impact" style="background: #f57c00;">
+                                Impact: HIGH
+                            </span>
+                        </div>
+                        <div class='code-example'>
+                            <div class="code-section">
+                                <strong>Before (Problematic):</strong>
+                                <pre><code class="language-python">def process_user_input(user_data): ...</code></pre>
+                            </div>
+                            
+                            <div class="code-section">
+                                <strong>After (Fixed):</strong>
+                                <pre><code class="language-python">def process_user_input(user_data, warnings=True): ... (with warning about lack of input validation)</code></pre>
+                            </div>
+                            </div>
+                    </div>
+                    </div>
+            </div>
+            
+            </div>
+            <div class="footer">
+                <p>Generated: 2026-05-20 20:39:42</p>
+                <p>MOE QA System v0.1.0</p>
+            </div>
+            <script>
+                hljs.highlightAll();
+            </script>
+        </body>
+        </html>
+        

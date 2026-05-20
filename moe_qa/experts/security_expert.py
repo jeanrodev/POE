@@ -37,7 +37,9 @@ Analyze the code and return findings in this exact JSON format:
             "description": "specific recommended change",
             "priority": "critical|high|medium|low",
             "effort": "minimal|small|medium|large",
-            "impact": "critical|high|medium|low"
+            "impact": "critical|high|medium|low",
+            "code_before": "vulnerable code snippet",
+            "code_after": "fixed code snippet"
         }
     ],
     "cve_references": [],
@@ -194,7 +196,7 @@ class SecurityExpert(BaseExpert):
             findings = llm_data.get("findings", []) + bandit_findings
             severity = llm_data.get("severity", "medium")
             
-            # Parse recommendations
+        # Parse recommendations
             rec_data = llm_data.get("recommendations", [])
             for rec in rec_data:
                 recommendations.append(
@@ -203,6 +205,8 @@ class SecurityExpert(BaseExpert):
                         priority=rec.get("priority", "medium"),
                         effort=rec.get("effort", "medium"),
                         impact=rec.get("impact", "medium"),
+                        code_before=rec.get("code_before", ""),
+                        code_after=rec.get("code_after", ""),
                     )
                 )
         except json.JSONDecodeError:

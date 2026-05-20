@@ -68,6 +68,8 @@ class ReportGenerator:
                         "priority": rec.priority,
                         "effort": rec.effort,
                         "impact": rec.impact,
+                        "code_before": rec.code_before,
+                        "code_after": rec.code_after,
                     }
                     for rec in response.recommendations
                 ],
@@ -147,6 +149,27 @@ class ReportGenerator:
                 recommendations_html = "<h4>💡 Recommendations:</h4><div class='recommendations'>"
                 for rec in response.recommendations:
                     rec_priority_color = priority_color.get(rec.priority, "#757575")
+                    
+                    # Build code example section
+                    code_html = ""
+                    if rec.code_before or rec.code_after:
+                        code_html = "<div class='code-example'>"
+                        if rec.code_before:
+                            code_html += f"""
+                            <div class="code-section">
+                                <strong>Before (Problematic):</strong>
+                                <pre><code class="language-python">{rec.code_before}</code></pre>
+                            </div>
+                            """
+                        if rec.code_after:
+                            code_html += f"""
+                            <div class="code-section">
+                                <strong>After (Fixed):</strong>
+                                <pre><code class="language-python">{rec.code_after}</code></pre>
+                            </div>
+                            """
+                        code_html += "</div>"
+                    
                     recommendations_html += f"""
                     <div class="recommendation-item">
                         <p><strong>{rec.description}</strong></p>
@@ -159,6 +182,7 @@ class ReportGenerator:
                                 Impact: {rec.impact.upper()}
                             </span>
                         </div>
+                        {code_html}
                     </div>
                     """
                 recommendations_html += "</div>"
@@ -181,8 +205,10 @@ class ReportGenerator:
         <head>
             <meta charset="UTF-8">
             <title>MOE QA Report - {report.file_path}</title>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
             <style>
-                body {{ font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }}
+                body {{ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 20px; background: #f5f5f5; }}
                 .header {{ background: #1976d2; color: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; }}
                 .container {{ background: white; padding: 20px; border-radius: 5px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
                 .expert-section {{ margin: 20px 0; padding: 15px; border-left: 4px solid #1976d2; background: #f9f9f9; }}
@@ -192,10 +218,17 @@ class ReportGenerator:
                 .recommendations {{ background: #e8f5e9; padding: 15px; border-radius: 4px; margin-top: 10px; }}
                 .recommendation-item {{ background: white; padding: 12px; margin: 10px 0; border-radius: 4px; border-left: 3px solid #4caf50; }}
                 .recommendation-item p {{ margin: 5px 0; }}
-                .rec-metadata {{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }}
+                .rec-metadata {{ display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; margin-bottom: 10px; }}
                 .badge {{ display: inline-block; padding: 4px 8px; border-radius: 3px; font-size: 0.85em; color: white; font-weight: bold; }}
                 .badge.effort {{ background: #2196f3; }}
                 .badge.impact {{ color: white; }}
+                
+                .code-example {{ margin-top: 12px; background: #f5f5f5; padding: 10px; border-radius: 4px; }}
+                .code-section {{ margin: 8px 0; }}
+                .code-section strong {{ display: block; margin-bottom: 6px; color: #333; font-size: 0.9em; }}
+                .code-section pre {{ margin: 0; padding: 10px; background: #2d2d2d; border-radius: 3px; overflow-x: auto; }}
+                .code-section code {{ font-size: 0.85em; line-height: 1.5; }}
+                
                 .footer {{ text-align: center; margin-top: 30px; color: #666; font-size: 0.9em; }}
             </style>
         </head>
@@ -215,6 +248,9 @@ class ReportGenerator:
                 <p>Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</p>
                 <p>MOE QA System v0.1.0</p>
             </div>
+            <script>
+                hljs.highlightAll();
+            </script>
         </body>
         </html>
         """

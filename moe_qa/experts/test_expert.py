@@ -35,7 +35,9 @@ Analyze the code and return findings in this exact JSON format:
             "description": "specific test or coverage recommendation",
             "priority": "critical|high|medium|low",
             "effort": "minimal|small|medium|large",
-            "impact": "critical|high|medium|low"
+            "impact": "critical|high|medium|low",
+            "code_before": "example of missing/poor test",
+            "code_after": "improved test code"
         }
     ],
     "test_suggestions": [],
@@ -159,6 +161,8 @@ class TestExpert(BaseExpert):
                         priority=rec.get("priority", "medium"),
                         effort=rec.get("effort", "medium"),
                         impact=rec.get("impact", "medium"),
+                        code_before=rec.get("code_before", ""),
+                        code_after=rec.get("code_after", ""),
                     )
                 )
         except json.JSONDecodeError:

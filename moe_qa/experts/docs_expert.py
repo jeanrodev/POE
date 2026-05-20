@@ -34,7 +34,9 @@ Analyze the code and return findings in this exact JSON format:
             "description": "specific documentation improvement",
             "priority": "critical|high|medium|low",
             "effort": "minimal|small|medium|large",
-            "impact": "critical|high|medium|low"
+            "impact": "critical|high|medium|low",
+            "code_before": "code without proper documentation",
+            "code_after": "code with improved documentation"
         }
     ],
     "missing_docstrings": [],
@@ -130,6 +132,8 @@ class DocsExpert(BaseExpert):
                         priority=rec.get("priority", "medium"),
                         effort=rec.get("effort", "medium"),
                         impact=rec.get("impact", "medium"),
+                        code_before=rec.get("code_before", ""),
+                        code_after=rec.get("code_after", ""),
                     )
                 )
         except json.JSONDecodeError:

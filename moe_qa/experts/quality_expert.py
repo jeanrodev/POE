@@ -37,7 +37,9 @@ Analyze the code and return findings in this exact JSON format:
             "description": "specific refactoring suggestion",
             "priority": "critical|high|medium|low",
             "effort": "minimal|small|medium|large",
-            "impact": "critical|high|medium|low"
+            "impact": "critical|high|medium|low",
+            "code_before": "current code snippet",
+            "code_after": "refactored code snippet"
         }
     ],
     "refactoring_suggestions": [],
@@ -169,6 +171,8 @@ class QualityExpert(BaseExpert):
                         priority=rec.get("priority", "medium"),
                         effort=rec.get("effort", "medium"),
                         impact=rec.get("impact", "medium"),
+                        code_before=rec.get("code_before", ""),
+                        code_after=rec.get("code_after", ""),
                     )
                 )
         except json.JSONDecodeError:
