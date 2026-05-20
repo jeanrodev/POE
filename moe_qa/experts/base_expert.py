@@ -84,7 +84,12 @@ class BaseExpert(ABC):
         """
         try:
             available_models = [m.model for m in self._client.list().models]
-            if self.model not in available_models:
+            # Ollama often reports pulled models with tags (e.g. wizardcoder:latest)
+            # while callers may use untagged names (e.g. wizardcoder).
+            normalized = set(available_models)
+            normalized.update(m.split(":", 1)[0] for m in available_models)
+
+            if self.model not in normalized:
                 raise RuntimeError(
                     f"Model '{self.model}' not found locally. "
                     f"Run: ollama pull {self.model}"

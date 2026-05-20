@@ -13,7 +13,7 @@ from typing import Optional
 import logging
 
 from .base_expert import BaseExpert, ExpertResponse
-from moe_qa.config.settings import ExpertModel
+from config.settings import ExpertModel
 
 logger = logging.getLogger(__name__)
 
@@ -133,6 +133,7 @@ class TestExpert(BaseExpert):
         raw_response = self._query_model(prompt)
 
         # Parse LLM response
+        llm_data = {}
         try:
             llm_data = json.loads(raw_response)
             findings = llm_data.get("findings", [])

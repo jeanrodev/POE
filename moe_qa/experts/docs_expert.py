@@ -12,7 +12,7 @@ from typing import Optional
 import logging
 
 from .base_expert import BaseExpert, ExpertResponse
-from moe_qa.config.settings import ExpertModel
+from config.settings import ExpertModel
 
 logger = logging.getLogger(__name__)
 

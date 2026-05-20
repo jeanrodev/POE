@@ -12,12 +12,12 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterator
 
-from moe_qa.experts.security_expert import SecurityExpert
-from moe_qa.experts.quality_expert import QualityExpert
-from moe_qa.experts.test_expert import TestExpert
-from moe_qa.experts.docs_expert import DocsExpert
-from moe_qa.experts.base_expert import ExpertResponse
-from moe_qa.config.settings import Settings
+from experts.security_expert import SecurityExpert
+from experts.quality_expert import QualityExpert
+from experts.test_expert import TestExpert
+from experts.docs_expert import DocsExpert
+from experts.base_expert import ExpertResponse
+from config.settings import Settings
 
 logger = logging.getLogger(__name__)
 

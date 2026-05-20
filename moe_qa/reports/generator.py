@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional
 
-from moe_qa.orchestrator.router import MOEReport
+from orchestrator.router import MOEReport
 
 logger_local = None
 

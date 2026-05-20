@@ -13,7 +13,7 @@ References
 """
 
 from pydantic import Field
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from enum import Enum
 
 
@@ -22,7 +22,7 @@ class ExpertModel(str, Enum):
 
     SECURITY = "codellama:7b"
     QUALITY = "deepseek-coder:6.7b"
-    TEST = "wizardcoder:7b"
+    TEST = "wizardcoder"
     DOCS = "mistral:7b"
     ORCHESTRATOR = "mistral:7b"
 
@@ -55,6 +55,8 @@ class Settings(BaseSettings):
     temperature: float = Field(default=0.1)
     report_output_dir: str = Field(default="./qa_reports")
 
-    class Config:
-        env_file = ".env"
-        env_prefix = "MOE_"
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_prefix="MOE_",
+        extra="ignore",
+    )
